@@ -8217,11 +8217,12 @@ the appropriate statement modifier."
 				 (documentation-property
 				  'cperl-short-docs
 				  'variable-documentation))))
-	 (manual-program (if is-func "perldoc -f" "perldoc")))
+	 (manual-program (concat "perldoc -i" (if is-func " -f"))))
     (cond
      ((featurep 'xemacs)
       (let ((Manual-program "perldoc")
-	    (Manual-switches (if is-func (list "-f"))))
+	    (Manual-switches (list "-i")))
+        (if is-func (add-to-list 'Manual-switches "-f"))
 	(manual-entry word)))
      (t
       (Man-getpage-in-background word)))))
