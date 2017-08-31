@@ -471,12 +471,6 @@ after reload."
   :type 'boolean
   :group 'cperl-speed)
 
-(defcustom cperl-imenu-addback nil
-  "*Not-nil means add backreferences to generated `imenu's.
-May require patched `imenu' and `imenu-go'.  Obsolete."
-  :type 'boolean
-  :group 'cperl-help-system)
-
 (defcustom cperl-max-help-size 66
   "*Non-nil means shrink-wrapping of info-buffer allowed up to these percents."
   :type '(choice integer (const nil))
@@ -5256,20 +5250,18 @@ indentation and initial hashes.  Behaves usually outside of comment."
   ;; We suppose that the lst is a DAG, unless the first element only
   ;; loops back, and ISBACK is set.  Thus this function cannot be
   ;; applied twice without ISBACK set.
-  (cond ((not cperl-imenu-addback) lst)
-	(t
-	 (or name
-	     (setq name "+++BACK+++"))
-	 (mapc (lambda (elt)
-		 (if (and (listp elt) (listp (cdr elt)))
-		     (progn
-		       ;; In the other order it goes up
-		       ;; one level only ;-(
-		       (setcdr elt (cons (cons name lst)
-					 (cdr elt)))
-		       (cperl-imenu-addback (cdr elt) t name))))
-	       (if isback (cdr lst) lst))
-	 lst)))
+  (or name
+      (setq name "+++BACK+++"))
+  (mapc (lambda (elt)
+          (if (and (listp elt) (listp (cdr elt)))
+              (progn
+                ;; In the other order it goes up
+                ;; one level only ;-(
+                (setcdr elt (cons (cons name lst)
+                                  (cdr elt)))
+                (cperl-imenu-addback (cdr elt) t name))))
+        (if isback (cdr lst) lst))
+  lst)
 
 (defun cperl-imenu--create-perl-index (&optional regexp)
   (require 'imenu)			; May be called from TAGS creator
@@ -5474,10 +5466,7 @@ indentation and initial hashes.  Behaves usually outside of comment."
   (condition-case errs
       (progn
 	(require 'font-lock)
-	(and (fboundp 'font-lock-fontify-anchored-keywords)
-	     (featurep 'font-lock-extra)
-	     (message "You have an obsolete package `font-lock-extra'.  Install `choose-color'."))
-	(let (t-font-lock-keywords t-font-lock-keywords-1 font-lock-anchored)
+        (let (t-font-lock-keywords t-font-lock-keywords-1 font-lock-anchored)
 	  (if (fboundp 'font-lock-fontify-anchored-keywords)
 	      (setq font-lock-anchored t))
 	  (setq
